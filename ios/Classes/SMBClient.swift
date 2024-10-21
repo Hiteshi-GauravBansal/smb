@@ -81,19 +81,26 @@ class SMBClient {
     
     // Add upload file functionality
    func uploadFile(from localPath: String, to remotePath: String, handler: @escaping (Result<String, Error>) -> Void) {
-        guard let localURL = URL(string: localPath) else {
+        
+        var filePath : String =  localPath
+//         if filePath.hasPrefix("/") {
+//     filePath.remove(at: filePath.startIndex)
+// }
+        print("local path when upload is : \(filePath)")
+        guard let localURL = URL(string: filePath) else {
             handler(.failure(NSError(domain: "Invalid local file path", code: 1, userInfo: nil)))
             return
         }
-        
+        let fileUrl = URL(fileURLWithPath: filePath)
         connect { result in
             switch result {
             case .success(let client):
-                client.uploadItem(at: localURL, toPath: remotePath, progress: { bytesSent in
+                client.uploadItem(at: fileUrl, toPath: remotePath, progress: { bytesSent in
                     // Optionally track the progress of the upload
                     return true // Continue uploading
                 }, completionHandler: { error in
                     if let error = error {
+                        print("error localURL \(localURL) remotePath \(remotePath) ")
                         handler(.failure(error))
                     } else {
                         handler(.success("File uploaded to \(remotePath)"))

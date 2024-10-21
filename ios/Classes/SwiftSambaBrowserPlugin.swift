@@ -79,25 +79,35 @@ public class SwiftSambaBrowserPlugin: NSObject, FlutterPlugin {
 
      // Add upload file functionality
    private func uploadFile(args: [String: Any], flutterResult: @escaping FlutterResult) {
-    let url: String = "smb://" + Array((args["url"] as! String).split(separator: "/"))[1..<3].joined(separator: "/")
+    let url: String = "smb://" + Array((args["url"] as! String).split(separator: "/"))[1..<3].joined(separator: "/") + "/" 
     let share: String = String(url.split(separator: "/").last!)
-    let remotePath: String = String((args["url"] as! String).replacingOccurrences(of: url, with: "").dropFirst())
-    
     let localFilePath: String = args["fileName"] as! String
+    let remotePath: String = "smb://" + Array((args["url"] as! String).split(separator: "/"))[1..<3].joined(separator: "/") + "/" 
+    // + String(localFilePath.split(separator: "/").last!)
+    
     let user: String = args["username"] as! String
     let password: String = args["password"] as! String
     
     // Convert the local file path to a proper file URL
-    let localFileURL = URL(fileURLWithPath: localFilePath)
-    
+    // let localFileURL = URL(fileURLWithPath: localFilePath)
+
+
     // Check if the file exists at the specified local path
-    guard FileManager.default.fileExists(atPath: localFileURL.path) else {
-        flutterResult(FlutterError(code: "FileNotFound", message: "The file at the specified path does not exist.", details: nil))
-        return
-    }
+        if FileManager.default.fileExists(atPath: localFilePath) {
+            print("File exists")
+            print("remotePath : \(remotePath)")
+            print("url : \(url)")
+            print("share : \(share)")
+        } else {
+            print("File not found at path: \(localFilePath)")
+            print("remotePath : \(remotePath)")
+            print("url : \(url)")
+            print("share : \(share)")
+        }
+
 
     // Proceed with the upload using the valid file URL
-    SMBClient(url: url, share: share, user: user, password: password).uploadFile(from: localFileURL.path, to: remotePath, handler: { result in
+    SMBClient(url: url, share: share, user: user, password: password).uploadFile(from: localFilePath, to: remotePath, handler: { result in
         switch result {
         case .success(let message):
             flutterResult(message)
